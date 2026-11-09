@@ -103,7 +103,31 @@ jobs:
           cache-from: type=gha
 
       - name: Validate test image health check
-        run: docker run --rm --entrypoint /kiosk immich-kiosk:test --healthcheck
+        shell: bash
+        run: |
+          set -euo pipefail
+          container=immich-kiosk-healthcheck-test
+          docker run --detach --name "$container" immich-kiosk:test
+          trap 'docker rm --force "$container" >/dev/null' EXIT
+
+          for attempt in {1..30}; do
+            if docker exec "$container" /kiosk --healthcheck >/dev/null 2>&1; then
+              echo "Test image health check passed"
+              exit 0
+            fi
+
+            if [[ "$(docker inspect --format '{{.State.Running}}' "$container")" != true ]]; then
+              echo "Test image exited before becoming healthy"
+              docker logs "$container"
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          echo "Test image did not become healthy within 60 seconds"
+          docker logs "$container"
+          exit 1
 
       - name: Log in to GHCR
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
