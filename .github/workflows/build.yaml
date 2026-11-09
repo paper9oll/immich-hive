@@ -1,0 +1,145 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  schedule:
+    - cron: '0 16 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out builder repository
+        uses: actions/checkout@v7
+        with:
+          path: builder
+          persist-credentials: false
+
+      - name: Check out upstream source
+        uses: actions/checkout@v7
+        with:
+          repository: damongolding/immich-kiosk
+          ref: main
+          path: upstream
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Record source and image name
+        id: source
+        shell: bash
+        run: |
+          echo "sha=$(git -C upstream rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Apply and verify clock customization
+        shell: bash
+        working-directory: upstream
+        run: |
+          git apply --check ../builder/patches/clock-format.patch
+          git apply ../builder/patches/clock-format.patch
+          python3 - <<'PY'
+          from pathlib import Path
+
+          source = Path("frontend/src/ts/clock.ts").read_text()
+          for expected in (
+              'TWELVE_HOUR: "h:mm a" as const,',
+              'TWELVE_HOUR_SECONDS: "h:mm:ss a" as const,',
+          ):
+              if source.count(expected) != 1:
+                  raise SystemExit(f"Clock customization verification failed: {expected}")
+          PY
+          git diff --check
+          git diff -- frontend/src/ts/clock.ts
+
+      - name: Include bundled styles and CSS loading tests
+        shell: bash
+        working-directory: upstream
+        run: |
+          git apply --check ../builder/patches/bundled-css.patch
+          git apply ../builder/patches/bundled-css.patch
+          cp ../builder/styles/bundled.css internal/utils/bundled.css
+          cp ../builder/tests/bundled_css_test.go internal/utils/bundled_css_test.go
+          git diff --check
+
+      - name: Set up Go for CSS loading tests
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: upstream/go.mod
+          cache-dependency-path: upstream/go.sum
+
+      - name: Test bundled and mounted CSS loading
+        working-directory: upstream
+        run: go test ./internal/utils -run '^TestBundledCSS' -count=1
+
+      - name: Build test image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./upstream
+          file: ./upstream/Dockerfile
+          pull: true
+          load: true
+          platforms: linux/amd64
+          tags: immich-kiosk:test
+          cache-from: type=gha
+
+      - name: Validate test image health check
+        run: docker run --rm --entrypoint /kiosk immich-kiosk:test --healthcheck
+
+      - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.source.outputs.image }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+            type=raw,value=build-${{ github.run_id }}-${{ github.run_attempt }},enable=${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+            type=raw,value=upstream-${{ steps.source.outputs.sha }},enable=${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          labels: |
+            org.opencontainers.image.revision=${{ steps.source.outputs.sha }}
+            io.immich-kiosk.builder.revision=${{ github.sha }}
+            io.immich-kiosk.upstream.source=https://github.com/damongolding/immich-kiosk
+
+      - name: Build and publish ARM64 image
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: docker/build-push-action@v7
+        with:
+          context: ./upstream
+          file: ./upstream/Dockerfile
+          pull: true
+          no-cache: ${{ github.event_name == 'schedule' }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: mode=min
+          sbom: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

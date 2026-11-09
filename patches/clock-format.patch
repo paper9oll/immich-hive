@@ -1,0 +1,14 @@
+diff --git a/frontend/src/ts/clock.ts b/frontend/src/ts/clock.ts
+--- a/frontend/src/ts/clock.ts
++++ b/frontend/src/ts/clock.ts
+@@ -6,8 +6,8 @@ const CLOCK_UPDATE_INTERVAL = 5000;
+ const CLOCK_UPDATE_INTERVAL_SECONDS = 1000;
+ 
+ const TIME_FORMATS = {
+-    TWELVE_HOUR: "h:mma" as const,
+-    TWELVE_HOUR_SECONDS: "h:mm:ssa" as const,
++    TWELVE_HOUR: "h:mm a" as const,
++    TWELVE_HOUR_SECONDS: "h:mm:ss a" as const,
+     TWELVE_HOUR_NO_AMPM: "h:mm" as const,
+     TWELVE_HOUR_SECONDS_NO_AMPM: "h:mm:ss" as const,
+     TWENTY_FOUR_HOUR: "HH:mm" as const,

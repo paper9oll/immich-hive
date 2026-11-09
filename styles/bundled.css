@@ -1,0 +1,34 @@
+.kiosk--spinner {
+	display: none;
+}
+
+#clock-weather-container {
+	top: auto !important;
+	bottom: 0 !important;
+}
+
+#clock::before {
+	background: none;
+}
+
+.clock--date,
+.clock--time {
+	font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+	text-shadow:
+		0 0 2px rgba(0, 0, 0, 0.9),
+		0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.clock--date {
+	font-size: 32px;
+}
+
+.clock--time {
+	font-size: 52px;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+}
+
+.frame {
+	background: #000 !important;
+}
