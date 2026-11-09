@@ -1,0 +1,32 @@
+diff --git a/internal/utils/utils.go b/internal/utils/utils.go
+--- a/internal/utils/utils.go
++++ b/internal/utils/utils.go
+@@ -1104,8 +1104,14 @@
+ }
+ 
+ func LoadCustomCSS() ([]byte, error) {
+-	if !FileExists("./custom.css") {
+-		return nil, nil
++	customCSS, err := os.ReadFile("./custom.css")
++	if errors.Is(err, os.ErrNotExist) {
++		return bundledCSS, nil
+ 	}
+-	return os.ReadFile("./custom.css")
++	if err != nil {
++		return bundledCSS, err
++	}
++
++	// Keep mounted CSS after the bundled defaults so normal cascade rules apply.
++	return bytes.Join([][]byte{bundledCSS, customCSS}, []byte("\n")), nil
+ }
+diff --git a/internal/utils/bundled_css.go b/internal/utils/bundled_css.go
+new file mode 100644
+--- /dev/null
++++ b/internal/utils/bundled_css.go
+@@ -0,0 +1,6 @@
++package utils
++
++import _ "embed"
++
++//go:embed bundled.css
++var bundledCSS []byte
