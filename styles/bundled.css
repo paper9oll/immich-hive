@@ -11,7 +11,7 @@
 	min-width: 0 !important;
 	align-items: center;
 	justify-content: flex-start;
-	gap: clamp(1rem, 3vw, 3rem);
+	gap: 0.5rem;
 }
 
 .weather {
@@ -20,10 +20,9 @@
 	text-align: left;
 }
 
-.weather::before {
+#weather-container::before {
 	background: none;
 }
-
 .weather--stats {
 	align-items: flex-start;
 	text-align: left;
@@ -34,7 +33,10 @@
 }
 
 .clock--date,
-.clock--time {
+.clock--time,
+.weather--location,
+.weather--temp,
+.weather--stats {
 	font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 	text-shadow:
 		0 0 2px rgba(0, 0, 0, 0.9),
