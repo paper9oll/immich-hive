@@ -42,6 +42,24 @@ func TestBundledCSSLoading(t *testing.T) {
 	}
 }
 
+func TestBundledCSSWeatherBesideClock(t *testing.T) {
+	for _, expected := range [][]byte{
+		[]byte("#clock-weather-container {"),
+		[]byte("left: 0 !important;"),
+		[]byte("width: auto !important;"),
+		[]byte("justify-content: flex-start;"),
+		[]byte("gap: clamp(1rem, 3vw, 3rem);"),
+		[]byte(".weather {"),
+		[]byte(".weather::before {"),
+		[]byte("background: none;"),
+		[]byte(".weather--stats {"),
+	} {
+		if !bytes.Contains(bundledCSS, expected) {
+			t.Errorf("bundled CSS is missing weather layout rule %q", expected)
+		}
+	}
+}
+
 func TestBundledCSSOnCustomReadError(t *testing.T) {
 	t.Chdir(t.TempDir())
 	if err := os.Mkdir("custom.css", 0o700); err != nil {
