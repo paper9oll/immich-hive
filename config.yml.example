@@ -1,0 +1,147 @@
+# Copy to config/config.yml and replace the required values.
+
+# Required settings
+immich_api_key: ''
+immich_url: 'http://immich-server:2283'
+
+# External url for image links/QR codes
+# immich_external_url: ''
+
+# Clock
+show_time: true
+time_format: 12
+show_date: true
+date_format: 'DDD, MMM D'
+clock_source: client
+
+# Kiosk behaviour
+duration: 5
+disable_screensaver: false
+optimize_images: false
+use_gpu: true
+burn_in_interval: 0
+burn_in_duration: 30
+burn_in_opacity: 70
+
+# Asset sources
+show_archived: false
+albums: []
+album_order: random
+excluded_albums: []
+people: []
+require_all_people: false
+excluded_people: []
+dates: []
+tags: []
+excluded_tags: []
+rating: -1
+excluded_partners: []
+memories: false
+blacklist: []
+
+# Filters
+filter_date: ''
+filter_newest: 0
+filter_exclude_faces: false
+filter_favorites: false
+
+# UI
+show_progress_bar: false
+disable_navigation: true
+disable_ui: false
+frameless: true
+hide_cursor: false
+font_size: 100
+background_blur: false
+background_blur_amount: 10
+theme: fade
+layout: splitview
+show_user: false
+
+# Sleep mode
+# sleep_start: 22
+# sleep_end: 7
+# sleep_dim_screen: false
+
+# Transition options
+transition: none
+fade_transition_duration: 1
+cross_fade_transition_duration: 1
+slide_transition_duration: 2
+push_transition_duration: 3
+
+# Image display settings
+image_fit: cover
+image_effect: smart-zoom
+image_effect_amount: 100
+use_original_image: false
+
+# Video
+show_videos: false
+live_photos: false
+live_photo_loop_delay: 0
+show_animated_gifs: false
+
+# Image metadata
+show_image_rating: false
+show_owner: false
+show_album_name: false
+show_person_name: false
+show_person_age: false
+show_image_time: false
+image_time_format: 24
+show_image_date: false
+image_date_format: 'YYYY-MM-DD'
+show_image_description: false
+show_image_camera: false
+show_image_exif: false
+show_image_location: false
+hide_countries: []
+show_image_id: false
+show_image_qr: false
+
+# More info overlay
+more_info:
+  display: false
+  like_button_action: favorite
+  hide_button_action: tag
+  show:
+    asset_link: false
+    qr_code: false
+    rating: false
+    like_button: false
+    hide_button: false
+
+# Weather
+weather:
+  locations:
+    - name: ''
+      lat: ''
+      lon: ''
+      api: ''
+      unit: metric
+      round_temperature: true
+      lang: en
+      forecast: false
+      show:
+        temperature_range: false
+        humidity: false
+        wind: false
+        wind_direction: false
+        visibility: false
+      default: true
+
+# Kiosk settings
+kiosk:
+  port: 3000
+  behind_proxy: false
+  disable_url_queries: true
+  disable_config_endpoint: false
+  enable_url_builder: false
+  watch_config: false
+  fetched_assets_size: 1000
+  http_timeout: 20
+  password: ''
+  cache: true
+  prefetch: true
+  asset_weighting: true

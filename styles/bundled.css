@@ -4,7 +4,29 @@
 
 #clock-weather-container {
 	top: auto !important;
+	right: auto !important;
 	bottom: 0 !important;
+	left: 0 !important;
+	width: auto !important;
+	min-width: 0 !important;
+	align-items: center;
+	justify-content: flex-start;
+	gap: clamp(1rem, 3vw, 3rem);
+}
+
+.weather {
+	align-items: flex-start;
+	padding-left: 0;
+	text-align: left;
+}
+
+.weather::before {
+	background: none;
+}
+
+.weather--stats {
+	align-items: flex-start;
+	text-align: left;
 }
 
 #clock::before {
