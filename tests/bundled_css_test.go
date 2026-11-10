@@ -48,10 +48,11 @@ func TestBundledCSSWeatherBesideClock(t *testing.T) {
 		[]byte("left: 0 !important;"),
 		[]byte("width: auto !important;"),
 		[]byte("justify-content: flex-start;"),
-		[]byte("gap: clamp(1rem, 3vw, 3rem);"),
+		[]byte("gap: 0.5rem;"),
 		[]byte(".weather {"),
-		[]byte(".weather::before {"),
+		[]byte("#weather-container::before {"),
 		[]byte("background: none;"),
+		[]byte(".weather--location,\n.weather--temp,\n.weather--stats {\n\tfont-family: -apple-system, BlinkMacSystemFont, sans-serif;\n\ttext-shadow:\n\t\t0 0 2px rgba(0, 0, 0, 0.9),\n\t\t0 0 6px rgba(0, 0, 0, 0.6);\n}"),
 		[]byte(".weather--stats {"),
 	} {
 		if !bytes.Contains(bundledCSS, expected) {
